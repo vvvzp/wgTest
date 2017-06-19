@@ -19,7 +19,17 @@ var check = function(){
 			})
 		}
 	});
-}
+};
+var checkAddNewUsers = function(){
+	fire.getNewUsers(function(res){
+		if(res && res.length){
+			var users = res.split(',');
+			user.getUsersInfo(function(res){
+				console.log(res)
+			}, users)
+		}
+	})
+};
 fire.getUsersData(function(users){
 	user.updateuData(users);
 	check();
@@ -30,8 +40,10 @@ fire.getUsersData(function(users){
 			console.log('. 10 min')
 		}
 		check();
+		//checkAddNewUsers();
 	}, 10000);
 });
+checkAddNewUsers();
 // run once for create users structure
 // which must have stat
 // request user info and save to fire

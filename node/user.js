@@ -56,10 +56,12 @@ module.exports.updateuData = function(obj){
 		this.updateOneUserData(obj[i]);
 	}
 }
-module.exports.getUsersInfo = function(callback){
-	var list = [];
-	for(var i in uData){
-		list.push(i);
+module.exports.getUsersInfo = function(callback, list){
+	if(!list){
+		var list = [];
+		for(var i in uData){
+			list.push(i);
+		}
 	}
 	var options = new Options(list.join(','));
 	rest.getJSON(options, function(statusCode, res) {
@@ -90,7 +92,6 @@ module.exports.checkUsers = function(callback){
 								}
 							}
 						}
-						//console.log(obj)
 						resp.push({account_id : i, obj : obj, newStat : res.data[i]});
 					}
 				} else {
@@ -100,18 +101,4 @@ module.exports.checkUsers = function(callback){
 		}
 		callback(resp);
 	})
-}
-var getResult = function(userInfo, newStat){
-	var obj = {
-		userInfo : userInfo,
-		result : {}
-	};
-	for(var prop in userInfo['stat']){
-		if(userInfo['stat'][prop] != newStat[prop]){
-			obj['result'][prop] = newStat[prop] - userInfo['stat'][prop];
-		} else {
-			obj['result'][prop] = 0;
-		}
-	}
-	return obj;
 }

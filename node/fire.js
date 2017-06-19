@@ -16,3 +16,8 @@ module.exports.getUsersData = function(callback){
 		callback(res.val());
 	});
 }
+module.exports.getNewUsers = function(callback){
+	database.ref().child("WG/addUser").once('value').then(function(res){
+		callback(res.val());
+	});
+}
