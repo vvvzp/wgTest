@@ -1,0 +1,13 @@
+{
+  "name": "WgApiTest",
+  "version": "0.0.1",
+  "description": "test project",
+  "main": "wg.js",
+  "dependencies": {
+    "firebase": "^4.1.2"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "author": "Vitalii Volovich",
+  "license": "MIT"
+}
