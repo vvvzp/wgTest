@@ -2,63 +2,35 @@ var rest = require('./rest');
 var user = require('./user');
 var fire = require('./fire');
 
-// no used
-var GetUserObject = function(user){
-	console.log(typeof user['updated_at'])
-	return {
-		user : user['account_id'],
-		obj : {
-			nickname : user['nickname'],
-			logout : user['logout_at'],
-			last_battle_time : user['last_battle_time'],
-			updated_at : user['updated_at'],
-			battles : {},
-			stat : {
-				battles : user['statistics']['all']['battles'],
-				wins : user['statistics']['all']['wins'],
-				losses : user['statistics']['all']['losses']
-			}
-		}
-	}
-}
 var check = function(){
 	user.checkUsers(function(res){
+		console.log("@! ", res.length);
 		if(res && res.length){
 			res.forEach(function(userObj){
 				var _time = (new Date()).getTime();
 				var obj = {
-					user : user['account_id'],
-					obj : {
-						battles : {}
-					}
+					battles : {}
 				};
-				obj.obj.battles[_time] = user['statistics']['all']['battles'];
-				console.log("## ",obj)
-				//fire.updateUserData();
+				obj.battles[_time] = userObj.obj;
+				console.log("## ", obj)
+				fire.updateUserDataFull(userObj['account_id']+'/battles', obj.battles);
+				fire.updateUserDataFull(userObj['account_id'], userObj.newStat);
+				user.updateOneUserData(userObj.newStat);
 			})
 		}
 	});
 }
 fire.getUsersData(function(users){
-	user.updateuData(users, function(res){
-		// nothing to do, only for debuging
-		if(res && res.length){
-			console.log('user(s) without stat!!!')
-			res.forEach(function(user, index){
-				//console.log(index, "#", user)
-			})
+	user.updateuData(users);
+	check();
+	var qu = 0;
+	setInterval(function(){
+		if(++qu > 60){
+			qu = 0;
+			console.log('. 10 min')
 		}
-		// end debug
 		check();
-		var qu = 0;
-		setInterval(function(){
-			if(++qu > 60){
-				qu = 0;
-				console.log('. 10 min')
-			}
-			check();
-		}, 10000);
-	})
+	}, 10000);
 });
 // run once for create users structure
 // which must have stat

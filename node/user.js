@@ -13,13 +13,14 @@ var Options = function(ids){
     	}
 	}
 }
-var Statistic = function(){
+var Statistic = function(obj){
 	return {
 		battles : '',
 		wins : '',
 		losses : ''
 	}
 }
+var statMap = ['battles', 'wins', 'losses'];
 var uData = {};
 module.exports.getUserInfoById = function(id, callback){
 	var options = new Options(id);
@@ -31,33 +32,29 @@ module.exports.getUserInfoById = function(id, callback){
 	    }
 	});
 }
-// return obj, contain users with created stat
-module.exports.updateuData = function(obj, callback){
-
-//rewrite !!!!!!
-
-	var resp = [];
+module.exports.updateOneUserData = function(user){
+	var id = user.account_id;
+	var clone = function(objFrom){
+		var objTo = {};
+		for(var i in objFrom){
+			if(typeof(objFrom[i]) != 'object'){
+				objTo[i] = objFrom[i];
+			} else {
+				objTo[i] = clone(objFrom[i]);
+			}
+		}
+		return objTo;
+	}
+	if(!uData.hasOwnProperty(id)){
+		uData[id] = {};
+	}
+	uData[id] = clone(user);
+	console.log(uData)
+}
+module.exports.updateuData = function(obj){
 	for(var i in obj){
-		console.log(i)
-		if(!uData.hasOwnProperty(i)){
-			uData[i] = {};
-		}
-		if(obj[i].hasOwnProperty('stat')){
-			if(!uData[i].hasOwnProperty('stat')){
-				uData[i]['stat'] = new Statistic();
-			}
-			for(var x in obj[i]['stat']){
-				uData[i]['stat'][x] = obj[i]['stat'][x];
-			}
-		} else {
-			console.log('no stat')
-			resp.push(obj[i]);
-		}
+		this.updateOneUserData(obj[i]);
 	}
-	if(callback) {
-		callback(resp);
-	}
-	// call from wg.js and save to uData all entries (init)
 }
 module.exports.getUsersInfo = function(callback){
 	var list = [];
@@ -76,16 +73,28 @@ module.exports.checkUsers = function(callback){
 		if(res && res.data){
 			for(var i in res.data){
 				if(uData.hasOwnProperty(i)){
-					console.log('%%%',uData[i]['updated_at'],res.data[i]['updated_at'])
+					console.log('%%% u',uData[i]['updated_at'],' res ',res.data[i]['updated_at'])
 					if(uData[i]['updated_at'] != res.data[i]['updated_at']){
 						console.log('battle!');
-						for(x in res.data[i]){
-							if(typeof(res.data[i][x]) != "object"){
-								uData[i][x] = res.data[i][x];
+						var obj = {};
+						for(var x in res.data[i]['statistics']){
+							var stat = res.data[i]['statistics'][x];
+							if(typeof(stat) == 'object' && x != 'frags'){
+								console.log('b:', stat.battles, ':',uData[i]['statistics'][x]['battles']);
+
+								if(stat['battles'] != uData[i]['statistics'][x]['battles']){
+									obj[x] = {};
+									statMap.forEach(function(stName){
+										obj[x][stName] = stat[stName] - uData[i]['statistics'][x][stName];
+									})
+								}
 							}
 						}
-						//resp.push(self.getResult(uData[i], res.data[i]['statistics']['all']))
+						//console.log(obj)
+						resp.push({account_id : i, obj : obj, newStat : res.data[i]});
 					}
+				} else {
+					self.updateOneUserData(res.data(i));
 				}
 			}
 		}
