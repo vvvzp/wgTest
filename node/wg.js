@@ -20,21 +20,19 @@ var check = function(){
 		}
 	});
 };
-var checkAddNewUsers = function(){
-	fire.getNewUsers(function(res){
-		if(res && res.length){
-			var users = res.split(',');
-			user.getUsersInfo(function(res){
-				if(res.meta.count > 0){
-					for(var x in res.data){
-						fire.updateUserDataFull(res.data[x]['account_id'], res.data[x]);
-						user.updateOneUserData(res.data[x]);
-					}
-					fire.clearRequestFieldForAddNewUsers();
-				}
-			}, users)
+var addNewUsers = function(arr){
+	var users = arr.split(',');
+	user.getUsersInfo(function(res){
+		if(res && res.meta && res.meta.count && res.meta.count > 0){
+			for(var x in res.data){
+				fire.updateUserDataFull(res.data[x]['account_id'], res.data[x]);
+				user.updateOneUserData(res.data[x]);
+			}
+		} else {
+			console.log('wrong users list!');
 		}
-	})
+		fire.clearRequestFieldForAddNewUsers();
+	}, users)
 };
 fire.getUsersData(function(users){
 	user.updateuData(users);
@@ -46,10 +44,8 @@ fire.getUsersData(function(users){
 			console.log('. 10 min')
 		}
 		check();
-		//checkAddNewUsers();
 	}, 10000);
 });
-checkAddNewUsers();
-fire.addListener('addUser', function(res){
-	console.log(res);
+fire.addListener('addUser', function(newUsersList){
+	addNewUsers(newUsersList);
 })
