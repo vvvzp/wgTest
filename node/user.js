@@ -49,7 +49,6 @@ module.exports.updateOneUserData = function(user){
 		uData[id] = {};
 	}
 	uData[id] = clone(user);
-	console.log(uData)
 }
 module.exports.updateuData = function(obj){
 	for(var i in obj){
