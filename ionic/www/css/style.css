@@ -1,0 +1,15 @@
+.myInput{
+	width: 94%;
+	padding: 5px 2% !important;
+	margin: 10px 1% 10px;
+	border: 1px solid #ccc !important;
+}
+.over-hide{
+	overflow: hidden;
+}
+.f-btn{
+	margin: 0 1%;
+}
+.h1{
+	text-align: center;
+}

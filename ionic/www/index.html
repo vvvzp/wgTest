@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <!-- un-comment this code to enable service worker
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(() => console.log('service worker installed'))
+          .catch(err => console.log('Error', err));
+      }
+    </script>-->
+
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+    <script src="lib/firebase.js"></script>
+    <script src="lib/angularfire.min.js"></script>
+    <!-- your app's js -->
+    <script src="js/settings.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/mainCtrl.js"></script>
+    <script src="js/userService.js"></script>
+    <script src="js/fireService.js"></script>
+    <script src="js/dataService.js"></script>
+  </head>
+  <body ng-app="main" ng-controller="mainCtrl">
+    <ion-header-bar class="bar-stable">
+    </ion-header-bar>
+    <ion-header-bar class="bar-stable" ng-if="Visible.list">
+      <button class="button button-balanced" on-tap="changeVisible('add')">
+        +Add
+      </button>
+      <h1 class="title" on-tap="changeVisible('list')" style="overflow:hidden;text-align:center;">Users</h1>
+      <button class="button button-assertive" on-tap="changeVisible('remove')">
+        Delete
+      </button>
+    </ion-header-bar>
+    <ion-header-bar class="bar-stable" ng-if="Visible.add">
+      <button class="button" on-tap="changeVisible('list')">
+        Back
+      </button>
+      <h1 class="title" on-tap="changeVisible('add')" style="text-align:center;">Add User</h1>
+    </ion-header-bar>
+    <ion-header-bar class="bar-stable" ng-if="Visible.userStat || Visible.remove" on-tap="changeVisible('list')">
+      <button class="button" on-tap="changeVisible('list')">
+        Back
+      </button>
+      <h1 class="title" ng-show="Visible.remove" style="text-align:center;">Remove User</h1>
+      <button class="button button-assertive" ng-show="Visible.delAllButton" on-tap="deleteSelected(page.users)">
+        Delete Selected
+      </button>
+    </ion-header-bar>
+    <ion-content ng-show="Visible.list">
+      <ion-list>
+        <ion-item ng-repeat="item in page.users | orderBy:page.sort:page.reverse" on-tap="showUserStat(item)" style="font-size:100%;padding:0">
+        <div class="row">
+          <div class="col col-33 over-hide">
+            {{item.nickname}}
+          </div>
+          <div class="col col-20">
+            {{item.param.percent}}%
+          </div>
+          <div class="col col-10">
+            {{item.param.battles}}K
+          </div>
+          <div class="col" style="font-size:80%">
+            {{item.param.lastBattle | date:'MMM d, h:mm:ss a'}}
+          </div>
+        </div>
+        </ion-item>
+      </ion-list>
+      <div class="card">
+        <div class="item">
+          Last updated time: {{page.serverLastUpdate | date:'MMM d, h:mm:ss a'}}
+        </div>
+      </div>
+      <div class="card" ng-show="!Visible.loading" ng-if="page.users.length == 0">
+        <div class="item item-text-wrap">
+          Nothing to show. Please add user(s).
+        </div>
+      </div>
+      <div ng-show="Visible.loading" style="text-align:center; margin:10px 0;">
+        <ion-spinner icon="ios"></ion-spinner>
+      </div>
+    </ion-content>
+    <ion-content ng-show="Visible.userStat">
+      <h2 style="text-align:center;">{{page.userStat.nickname}}</h2>
+      <h4 style="text-align:center;"> {{page.userStat.param.percent}}% {{page.userStat.param.battlesFull}}b</h4>
+      <ion-list>
+        <ion-item ng-repeat="item in page.userStat.battles" style="padding:0;font-size:90%">
+        <div class="row" style="padding:0">
+          <div class="col col-40">
+            {{item.time | date:'MMM d, h:mm:ss a'}}
+          </div>
+          <div class="col" style="text-align:center;">
+            {{item.all.battles}}/{{item.all.wins}}
+          </div>
+          <div class="col">
+            {{item.percent}}%
+          </div>
+          <div class="col" ng-if="item.uppercent > 0" style="color:green;margin-right:5px;">
+            <i class="ion-arrow-up-b"></i> {{item.uppercent}} %
+          </div>
+          <div class="col" ng-if="item.uppercent < 0" style="color:red;margin-right:5px;">
+            <i class="ion-arrow-down-b"></i> {{item.uppercent}} %
+          </div>
+          <div class="col" ng-if="item.uppercent == 0" style="color:blue;margin-right:5px;">
+            <i class="ion-minus-round"></i>
+          </div>
+        </div>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+    <ion-content ng-show="Visible.add">
+      <form ng-submit="searchUser(page.sName)">
+        <input class="myInput" type="text" ng-model="page.sName"placeholder="User nickname">
+      </form>
+      <ion-list>
+        <ion-item ng-repeat="item in page.foundUsers | orderBy:page.sort" on-tap="userSelected(item)">
+          {{item.nickname}}
+        </ion-item>
+      </ion-list>
+    </ion-content>
+    <ion-content ng-show="Visible.remove">
+      <ion-list>
+        <ion-item ng-repeat="item in page.users | orderBy:page.sort" style="padding:0">
+          <div class="row">
+            <div class="col col-33">
+              {{item.nickname}}
+            </div>
+              <div class="col" style="text-align:center;">
+                {{item.param.percent}} %
+              </div>
+              <div class="col">
+                {{item.param.battles}}K
+              </div>
+            <div class="col">
+              <ion-checkbox ng-model="item.check" ng-click="userToggle(page.users)"></ion-checkbox>
+            </div>
+          </div>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+    <ion-footer-bar class="bar" ng-show="Visible.list">
+      <button ng-class="page.fbtn[0]" class="button f-btn" on-tap="changeSort('nickname', false)">Name</button>
+      <button ng-class="page.fbtn[1]" class="button f-btn" on-tap="changeSort('param.percent')">Stat</button>
+      <button ng-class="page.fbtn[2]" class="button f-btn" on-tap="changeSort('param.battles')">Battles</button>
+      <button ng-class="page.fbtn[3]" class="button f-btn" on-tap="changeSort('param.lastBattle')">Time</button>
+      <button class="button" on-tap="changeSort('')">Sort switch</button>
+      </div>
+    </ion-footer-bar>
+  </body>
+</html>
