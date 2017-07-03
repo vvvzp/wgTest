@@ -31,6 +31,9 @@ MainModule
 					user['dailyBattles'] = {};
 					for(var i in user.battles){
 						user.battles[i]['time'] = i;
+						if(i > user['param']['lastBattle']){
+							user['param']['lastBattle'] = i;
+						}
 						user.battles[i]['percent'] = (user.battles[i]['all']['wins']/(user.battles[i]['all']['battles']/100)).toFixed(0);
 						var p = stat['battles']/100;
 						var diff = user.battles[i]['all']['wins'] - user.battles[i]['all']['losses'] - (user.battles[i]['all']['battles'] - user.battles[i]['all']['wins'] - user.battles[i]['all']['losses']);
