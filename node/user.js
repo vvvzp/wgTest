@@ -74,15 +74,12 @@ module.exports.checkUsers = function(callback){
 		if(res && res.data){
 			for(var i in res.data){
 				if(uData.hasOwnProperty(i)){
-					console.log('%%% u',uData[i]['updated_at'],' res ',res.data[i]['updated_at'])
 					if(uData[i]['updated_at'] != res.data[i]['updated_at']){
-						console.log('battle!');
+						console.log('battle! ',i,' : ', uData[i]['nickname']);
 						var obj = {};
 						for(var x in res.data[i]['statistics']){
 							var stat = res.data[i]['statistics'][x];
 							if(typeof(stat) == 'object' && x != 'frags'){
-								console.log('b:', stat.battles, ':',uData[i]['statistics'][x]['battles']);
-
 								if(stat['battles'] != uData[i]['statistics'][x]['battles']){
 									obj[x] = {};
 									statMap.forEach(function(stName){

@@ -5,7 +5,6 @@ var fire = require('./fire');
 var check = function(){
 	fire.setLastUpdateTime();
 	user.checkUsers(function(res){
-		console.log("@! ", res.length);
 		if(res && res.length){
 			res.forEach(function(userObj){
 				var _time = (new Date()).getTime();
