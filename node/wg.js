@@ -1,6 +1,7 @@
 var rest = require('./rest');
 var user = require('./user');
 var fire = require('./fire');
+var fs = require('fs');
 
 var check = function(){
 	fire.setLastUpdateTime();
@@ -18,6 +19,9 @@ var check = function(){
 			})
 		}
 	});
+	fs.readFile('/sys/devices/virtual/hwmon/hwmon1/temp1_input', 'utf8', function (err, data){
+		fire.updateData({temp:data*1});
+	})
 };
 var addNewUsers = function(arr){
 	var users = arr.split(',');

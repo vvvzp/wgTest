@@ -85,8 +85,8 @@
         </ion-item>
       </ion-list>
       <div class="card">
-        <div class="item">
-          Last updated time: {{page.serverLastUpdate | date:'MMM d, h:mm:ss a'}}
+        <div class="item" style="font-size:90%">
+          Last updated time: {{page.serverLastUpdate | date:'MMM d, h:mm:ss a'}} ... T: {{page.serverTemp}} C'
         </div>
       </div>
       <div class="card" ng-show="!Visible.loading" ng-if="page.users.length == 0">

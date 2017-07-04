@@ -119,5 +119,9 @@ MainModule
 	fireService.addListener('/lastUpdatedTime', function(val){
 		$scope.page.serverLastUpdate = val;
 		$scope.$apply();
+	});
+	fireService.addListener('/temp', function(val){
+		$scope.page.serverTemp = val;
+		$scope.$apply();
 	})
 });

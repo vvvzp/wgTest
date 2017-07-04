@@ -9,6 +9,9 @@ module.exports.setLastUpdateTime = function(time){
 	var _time = time || (new Date()).getTime();
 	database.ref().child("WG/lastUpdatedTime").set(_time);
 }
+module.exports.updateData = function(data){
+	firebase.database().ref().child("WG/").update(data);
+}
 module.exports.updateUserData = function(data){
 	firebase.database().ref().child("WG/Users/"+data.user).update(data.obj);
 }
